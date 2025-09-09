@@ -1,0 +1,33 @@
+name: Deploy Digital Business Card
+
+on:
+  push:
+    paths:
+      - business-card.html
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Commit & Push card (if needed)
+        run: |
+          git add business-card.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update digital business card"
+            git push
+          fi
+
+      - name: Print deployed card URL
+        run: |
+          echo "Your business card is now live at: https://zzxx95-05.github.io/business-card.html"
