@@ -1,0 +1,50 @@
+name: Deploy Digital Business Card
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install QR code generator
+        run: npm install qrcode --save
+
+      - name: Generate QR code for business card
+        run: |
+          node <<'EOF'
+          const QRCode = require('qrcode')
+          const fs = require('fs')
+          const url = 'https://zzxx95-05.github.io/digital-business-card.html'
+          QRCode.toFile('digital-business-card-qr.png', url, {
+            color: {
+              dark: '#1a2c49',
+              light: '#FFFFFF'
+            },
+            width: 300
+          }, function (err) {
+            if (err) throw err
+            console.log('QR code generated.')
+          })
+          EOF
+
+      - name: Copy digital-business-card.html and QR code to docs
+        run: |
+          mkdir -p docs
+          cp digital-business-card.html docs/
+          cp digital-business-card-qr.png docs/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs
